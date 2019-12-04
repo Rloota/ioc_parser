@@ -6,12 +6,11 @@ IOC Parser is a tool to extract indicators of compromise from security reports i
 * *FILE* File/directory path to report(s)/Gmail account in double quotes ("username@gmail.com password")
 * *-p INI* Pattern file
 * *-i FORMAT* Input format (pdf/txt/docx/html/csv/xls/xlsx/gmail)
-* *-o FORMAT* Output format (csv/json/yara/netflow)
+* *-o FORMAT* Output format (csv/json/yara/netflow/misp)
 * *-d* Deduplicate matches
 * *-l LIB* Parsing library
+* *-e* MISP event ID
 
-## Installation
-**pip install ioc_parser**
 
 ## Dependencies
 
@@ -34,6 +33,9 @@ For XLS/XLSX support:
 For Gmail support:
 * [gmail](https://github.com/charlierguo/gmail)
 
+For MISP output support:
+* [PyMISP](https://github.com/MISP/PyMISP)
+
 ## Merged changes from forks:
 
 [@buffer](https://github.com/buffer/ioc_parser/)
@@ -41,3 +43,5 @@ For Gmail support:
 [@dadokkio](https://github.com/dadokkio/ioc_parser/)
 
 [@LDO-CERT](https://github.com/LDO-CERT/ioc_parser/)
+
+[@SteveClement](https://github.com/SteveClement/ioc_parser)
