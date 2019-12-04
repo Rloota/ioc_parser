@@ -4,8 +4,13 @@ import os
 import sys
 import csv
 import json
+from pymisp import ExpandedPyMISP
 
-OUTPUT_FORMATS = ('csv', 'tsv', 'json', 'yara', 'netflow', )
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+from keys import misp_url, misp_key, misp_verifycert
+
+OUTPUT_FORMATS = ('csv', 'tsv', 'json', 'yara', 'netflow', 'misp' )
 
 
 def getHandler(output_format):
@@ -149,3 +154,59 @@ class OutputHandler_netflow(OutputHandler):
 
         if data["type"] == "IP":
             print(" or host %s " % data["match"])
+
+class OutputHandler_misp(OutputHandler):
+
+	def print_match(self, fpath, page, name, match):
+
+		misp = ExpandedPyMISP(misp_url, misp_key, misp_verifycert)
+		data = {
+			'path' : fpath,
+			'file' : os.path.basename(fpath),
+			'page' : page,
+			'type' : name,
+			'match': match
+		}
+		#f = json.loads(data)
+		#print(data['type'])
+		data_type = data['type']
+		data_match = data['match']
+		event_id = '1486'
+
+
+		if data_type == 'URL':
+			print("Importing to MISP ioc %s" %(data_match))
+			misp.add_attribute(event_id,{'type': 'url','value': data_match})
+		elif data_type == 'IP':
+			print("Importing to MISP ioc %s" %(data_match))
+			misp.add_attribute(event_id,{'type': 'ip-src','value': data_match})
+
+		elif data_type == 'Email':
+			print("Importing to MISP ioc %s" %(data_match))
+			misp.add_attribute(event_id,{'type': 'email-src','value': data_match})
+
+		elif data_type == 'MD5':
+			print("Importing to MISP ioc %s" %(data_match))
+			misp.add_attribute(event_id,{'type': 'md5','value': data_match})
+
+		elif data_type == 'SHA1':
+			print("Importing to MISP ioc %s" %(data_match))
+			misp.add_attribute(event_id,{'type': 'sha1','value': data_match})
+
+		elif data_type == 'SHA256':
+			print("Importing to MISP ioc %s" %(data_match))
+			misp.add_attribute(event_id,{'type': 'sha256','value': data_match})
+
+		elif data_type == 'CVE':
+			print("Importing to MISP ioc %s" %(data_match))
+			misp.add_attribute(event_id,{'type': 'vulnerability','value': data_match})
+
+		elif data_type == 'Registry':
+			print("Importing to MISP ioc %s" %(data_match))
+			misp.add_attribute(event_id,{'type': 'regkey','value': data_match})
+
+		elif data_type == 'Filename':
+			print("Importing to MISP ioc %s" %(data_match))
+			misp.add_attribute(event_id,{'type': 'filename','value': data_match})
+		else:
+			print("Data type: %s not supported by the script" %(data_type))
