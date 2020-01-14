@@ -35,6 +35,7 @@ For Gmail support:
 
 For MISP output support:
 * [PyMISP](https://github.com/MISP/PyMISP)
+
 Modify misp_keys.ini with values relevant to your MISP environment to use output.
 
 ## Merged changes from forks:
