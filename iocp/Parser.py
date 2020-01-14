@@ -93,18 +93,18 @@ import iocp
 from iocp import Output
 
 
-class Parser(object):
+class Parser():
     patterns = {}
     defang   = {}
 
-    def __init__(self, patterns_ini=None, input_format='pdf', dedup=False, library='pdfminer', output_format='csv', proxy=None, output_handler=None):
+    def __init__(self, patterns_ini=None, input_format='pdf', dedup=False, library='pdfminer', output_format='csv', misp_event=None, proxy=None, output_handler=None):
         self.__init_patterns(patterns_ini)
         self.__init_whitelist()
         self.__init_dedup(dedup)
-        self.__init_output_handler(output_format, output_handler)
+        self.__init_output_handler(output_format, output_handler, misp_event)
         self.__init_parser(input_format)
         self.__init_library(library, input_format)
-
+        #self.__init_misp_event(output_format, output_handler, misp_event)
         # Depending on the type of proxy, set the proper proxy setting for storage to be used with Requests
         if proxy is not None:
             if proxy.startswith('http://'):
@@ -130,8 +130,8 @@ class Parser(object):
         if dedup:
             self.dedup_store = set()
 
-    def __init_output_handler(self, output_format, output_handler):
-        self.handler = output_handler if output_handler else Output.getHandler(output_format)
+    def __init_output_handler(self, output_format, output_handler, misp_event):
+        self.handler = output_handler if output_handler else Output.getHandler(output_format, misp_event)
 
     def __init_parser(self, input_format):
         self.ext_filter = "*.{}".format(input_format)

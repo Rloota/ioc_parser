@@ -4,16 +4,31 @@ import os
 import sys
 import csv
 import json
-from pymisp import ExpandedPyMISP
+from pymisp import PyMISP
+
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser
+
+import io
+import iocp
+
 
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-from keys import misp_url, misp_key, misp_verifycert
-
 OUTPUT_FORMATS = ('csv', 'tsv', 'json', 'yara', 'netflow', 'misp' )
 
 
-def getHandler(output_format):
+def getHandler(output_format, misp_event):
+
+	#quick hacky global variable to access misp_event inside OutputHandler_misp class.
+    global g_misp_event
+    g_misp_event = misp_event
+    if output_format == 'misp' and misp_event == None:
+        e = "Valid MISP event ID required for MISP output."
+        raise ValueError(e)
+
     output_format = output_format.lower()
     if output_format not in OUTPUT_FORMATS:
         print("[WARNING] Invalid output format specified... using CSV")
@@ -157,9 +172,12 @@ class OutputHandler_netflow(OutputHandler):
 
 class OutputHandler_misp(OutputHandler):
 
-	def print_match(self, fpath, page, name, match):
-
-		misp = ExpandedPyMISP(misp_url, misp_key, misp_verifycert)
+	def print_match(self, fpath, page, name, match, flag, sheet=''):
+		#Read misp API key, address and cert value from misp_keys.ini
+		misp_keys_ini = os.path.join(iocp.get_basedir(), 'data/misp_keys.ini')
+		config = ConfigParser()			
+	
+		misp = PyMISP(config.get('misp', 'misp_url'), config.get('misp', 'misp_key'), config.get('misp', 'misp_verifycert'))
 		data = {
 			'path' : fpath,
 			'file' : os.path.basename(fpath),
@@ -167,16 +185,16 @@ class OutputHandler_misp(OutputHandler):
 			'type' : name,
 			'match': match
 		}
-		#f = json.loads(data)
-		#print(data['type'])
+
 		data_type = data['type']
 		data_match = data['match']
-		event_id = '1486'
+		event_id = g_misp_event
 
 
 		if data_type == 'URL':
 			print("Importing to MISP ioc %s" %(data_match))
 			misp.add_attribute(event_id,{'type': 'url','value': data_match})
+
 		elif data_type == 'IP':
 			print("Importing to MISP ioc %s" %(data_match))
 			misp.add_attribute(event_id,{'type': 'ip-src','value': data_match})
@@ -208,5 +226,6 @@ class OutputHandler_misp(OutputHandler):
 		elif data_type == 'Filename':
 			print("Importing to MISP ioc %s" %(data_match))
 			misp.add_attribute(event_id,{'type': 'filename','value': data_match})
+
 		else:
 			print("Data type: %s not supported by the script" %(data_type))
