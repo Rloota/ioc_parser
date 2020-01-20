@@ -4,7 +4,7 @@ import os
 import sys
 import csv
 import json
-from pymisp import PyMISP
+from pymisp import ExpandedPyMISP
 
 try:
     from configparser import ConfigParser
@@ -174,10 +174,10 @@ class OutputHandler_misp(OutputHandler):
 
 	def print_match(self, fpath, page, name, match, flag, sheet=''):
 		#Read misp API key, address and cert value from misp_keys.ini
-		misp_keys_ini = os.path.join(iocp.get_basedir(), 'data/misp_keys.ini')
-		config = ConfigParser()			
-	
-		misp = PyMISP(config.get('misp', 'misp_url'), config.get('misp', 'misp_key'), config.get('misp', 'misp_verifycert'))
+		config = ConfigParser()
+		config.read(os.path.join(iocp.get_basedir(), 'data/misp_keys.ini'))
+
+		misp = ExpandedPyMISP(config.get('misp', 'misp_url'), config.get('misp', 'misp_key'), False)
 		data = {
 			'path' : fpath,
 			'file' : os.path.basename(fpath),
