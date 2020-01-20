@@ -301,7 +301,7 @@ class Parser():
 
     def parse_txt(self, f, fpath):
         try:
-            data = f.read()
+            data = f.read().decode('utf8')
             self.handler.print_header(fpath)
             self.parse_page(fpath, data, 1)
             self.handler.print_footer(fpath)
