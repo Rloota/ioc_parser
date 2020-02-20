@@ -38,6 +38,13 @@ For MISP output support:
 
 Modify misp_keys.ini with values relevant to your MISP environment to use output.
 
+Installation of pymispwarninglist:
+* [Pymispwarninglist](https://github.com/MISP/PyMISPWarningLists.git) 
+- git clone https://github.com/MISP/PyMISPWarningLists.git
+- git submodule update --init 
+- pip3 install .
+
+
 ## Merged changes from forks:
 
 [@buffer](https://github.com/buffer/ioc_parser/)

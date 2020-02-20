@@ -5,7 +5,7 @@ import sys
 import csv
 import json
 from pymisp import ExpandedPyMISP
-
+from pymispwarninglists import WarningLists
 try:
     from configparser import ConfigParser
 except ImportError:
@@ -19,6 +19,8 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 OUTPUT_FORMATS = ('csv', 'tsv', 'json', 'yara', 'netflow', 'misp' )
 
+def init():
+    return WarningLists(slow_search=True)
 
 def getHandler(output_format, misp_event):
 
@@ -57,10 +59,16 @@ class OutputHandler(object):
 class OutputHandler_csv(OutputHandler):
     def __init__(self):
         self.csv_writer = csv.writer(sys.stdout, delimiter = '\t')
-
+        
     # Added flag and sheet which are unused but needed to make CSV output work
     def print_match(self, fpath, page, name, match, flag, sheet=''):
-        self.csv_writer.writerow((fpath, page, name, match, sheet))
+        warninglists=init() 
+        warninglistresult=warninglists.search(match)
+        if warninglistresult:
+            print("Hit found for %s in warninglists" % (match))
+            for hit in warninglistresult:
+                print(" %s %s %s %s" % (hit.type, hit.name, hit.version, hit.description))    
+	 self.csv_writer.writerow((fpath, page, name, match, sheet))
 
     def print_error(self, fpath, exception):
         self.csv_writer.writerow((fpath, '0', 'error', exception))
