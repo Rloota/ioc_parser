@@ -68,7 +68,7 @@ class OutputHandler_csv(OutputHandler):
             print("Hit found for %s in warninglists" % (match))
             for hit in warninglistresult:
                 print(" %s %s %s %s" % (hit.type, hit.name, hit.version, hit.description))    
-	 self.csv_writer.writerow((fpath, page, name, match, sheet))
+	    self.csv_writer.writerow((fpath, page, name, match, sheet))
 
     def print_error(self, fpath, exception):
         self.csv_writer.writerow((fpath, '0', 'error', exception))
